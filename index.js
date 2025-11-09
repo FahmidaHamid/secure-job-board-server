@@ -55,13 +55,20 @@ async function run() {
 
     //find jobs based on category
 
-    app.get("/jobs-by-cat/:category", async (req, res) => {
-      const { category } = req.params;
-      console.log(category);
-      const query = {};
-      query["category"] = { $regex: category, $options: "i" };
+    app.get("/jobs-by-cat/:id", async (req, res) => {
+      const { id } = req.params;
+      console.log(id);
       try {
-        const result = await jobCollection.find(query).toArray();
+        const possible_sub_cats = await catCollection.findOne(
+          { _id: new ObjectId(id) },
+          { sub_categories: 1 }
+        );
+        console.log(possible_sub_cats);
+        const result = await jobCollection
+          .find({
+            category: { $in: possible_sub_cats.sub_categories },
+          })
+          .toArray();
         res.send(result);
       } catch (err) {
         res.send(err);
