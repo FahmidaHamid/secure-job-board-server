@@ -75,6 +75,37 @@ async function run() {
       }
     });
 
+    app.get("/top-jobs", async (req, res) => {
+      const result = await jobCollection
+        .find({
+          category: {
+            $in: [
+              /data science/i,
+              /educa/i, // Exact string match
+              /fashion/i, // Another JavaScript regex object
+              /busi/i,
+              /arch/i,
+              /k-12/i,
+            ],
+          },
+        })
+        .sort({ expectedSalary: -1 })
+        .toArray(); //promise
+      //console.log(result);
+      const mid = Math.ceil(result.length / 2);
+      const newResult = [
+        result[0],
+        result[2],
+        result[mid + 3],
+        result[result.length - 1],
+        result[mid],
+        result[mid - 3],
+      ];
+      //console.log(result.length);
+
+      res.send(newResult);
+    });
+
     app.get("/all-categories", async (req, res) => {
       const result = await catCollection.find().toArray(); //promise
       //console.log(result);
