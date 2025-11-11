@@ -33,6 +33,7 @@ async function run() {
     const db = client.db("secureJobBoard");
     const jobCollection = db.collection("alljobs");
     const catCollection = db.collection("allcategories");
+    const userCollection = db.collection("registeredusers");
     //find all jobs
     app.get("/all-jobs", async (req, res) => {
       const result = await jobCollection.find().toArray(); //promise
@@ -109,6 +110,13 @@ async function run() {
     app.get("/all-categories", async (req, res) => {
       const result = await catCollection.find().toArray(); //promise
       //console.log(result);
+      res.send(result);
+    });
+
+    app.post("/users", async (req, res) => {
+      const newUser = req.body;
+      console.log(newUser);
+      const result = await userCollection.insertOne(newUser);
       res.send(result);
     });
   } finally {
