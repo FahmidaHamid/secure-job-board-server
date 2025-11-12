@@ -113,11 +113,40 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/users", async (req, res) => {
+      const result = await userCollection.find().toArray();
+      res.send(result);
+    });
+
     app.post("/users", async (req, res) => {
       const newUser = req.body;
       console.log(newUser);
       const result = await userCollection.insertOne(newUser);
       res.send(result);
+    });
+
+    app.post("/all-jobs", async (req, res) => {
+      const newJob = req.body;
+      console.log(newJob);
+      const result = await jobCollection.insertOne(newJob); //promise
+      //console.log(result);
+      res.send(result);
+    });
+
+    app.delete("/all-jobs/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await jobCollection.deleteOne(query);
+      res.send(result);
+      console.log("Delete a job from DB");
+    });
+
+    app.delete("/users/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await userCollection.deleteOne(query);
+      res.send(result);
+      console.log("Delete a user from DB");
     });
   } finally {
     // Ensures that the client will close when you finish/error
