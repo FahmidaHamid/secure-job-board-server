@@ -8,7 +8,7 @@ const admin = require("firebase-admin");
 var serviceAccount = require("./career-bridge-authentication-firebase-adminsdk-fbsvc-7180bc9608");
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
+  //credential: admin.credential.cert(serviceAccount),
 });
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWD}@cluster0.0laypje.mongodb.net/?appName=Cluster0`;
