@@ -3,6 +3,14 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 
+const admin = require("firebase-admin");
+
+var serviceAccount = require("./career-bridge-authentication-firebase-adminsdk-fbsvc-7180bc9608");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWD}@cluster0.0laypje.mongodb.net/?appName=Cluster0`;
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 
@@ -16,12 +24,36 @@ const client = new MongoClient(uri, {
 //const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.0laypje.mongodb.net/?appName=Cluster0`;
 const app = express();
 //middleware
-app.use(cors());
+app.use(
+  cors({
+    credentials: true, // Allow sending cookies/authorization headers
+  })
+);
 app.use(express.json());
 
 app.get("/", (req, res) => {
   res.send("Programming Hero Assignment 10");
 });
+
+const verifyFireBaseToken = async (req, res, next) => {
+  if (!req.headers.authorization) {
+    return res.status(401).send({ message: "unauthorized access" });
+  }
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return res.status(401).send({ message: "unauthorized access" });
+  }
+  // verify token
+  try {
+    const userInfo = await admin.auth().verifyIdToken(token);
+    req.token_email = userInfo.email;
+    console.log("after token validation", userInfo);
+    next();
+  } catch {
+    console.log("invalid token");
+    return res.status(401).send({ message: "unauthorized access" });
+  }
+};
 
 async function run() {
   try {
@@ -64,10 +96,13 @@ async function run() {
           { _id: new ObjectId(id) },
           { sub_categories: 1 }
         );
-        console.log(possible_sub_cats);
+        console.log("sub categories: ", possible_sub_cats);
         const result = await jobCollection
           .find({
-            category: { $in: possible_sub_cats.sub_categories },
+            $or: [
+              { category: { $in: possible_sub_cats.sub_categories } }, // Documents where status is either "pending" or "rejected"
+              { category: possible_sub_cats.super_category }, // Documents where category is
+            ],
           })
           .toArray();
         res.send(result);
@@ -125,7 +160,24 @@ async function run() {
       res.send(result);
     });
 
-    app.post("/all-jobs", async (req, res) => {
+    app.get("/jobs-added", async (req, res) => {
+      console.log(req);
+      const email = req.query.email;
+      console.log(email);
+      //const query = {};
+      if (email) {
+        //query.email = email;
+        //console.log(query);
+        const cursor = jobCollection.find({ emailOfPostedBy: email });
+        const result = await cursor.toArray();
+        console.log(result);
+        res.send(result);
+      } else {
+        res.send({});
+      }
+    });
+
+    app.post("/all-jobs", verifyFireBaseToken, async (req, res) => {
       const newJob = req.body;
       console.log(newJob);
       const result = await jobCollection.insertOne(newJob); //promise
