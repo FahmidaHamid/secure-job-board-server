@@ -5,7 +5,7 @@ require("dotenv").config();
 
 const admin = require("firebase-admin");
 
-var serviceAccount = require("./career-bridge-authentication-firebase-adminsdk-fbsvc-7180bc9608");
+//let serviceAccount = require("./career-bridge-authentication-firebase-adminsdk-fbsvc-7180bc9608");
 
 admin.initializeApp({
   //credential: admin.credential.cert(serviceAccount),
