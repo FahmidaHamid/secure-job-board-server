@@ -5,11 +5,11 @@ require("dotenv").config();
 
 const admin = require("firebase-admin");
 
-//let serviceAccount = require("./career-bridge-authentication-firebase-adminsdk-fbsvc-7180bc9608");
+let serviceAccount = require("./career-bridge-authentication-firebase-adminsdk-fbsvc-7180bc9608");
 
-// admin.initializeApp({
-//   //credential: admin.credential.cert(serviceAccount),
-// });
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWD}@cluster0.0laypje.mongodb.net/?appName=Cluster0`;
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -53,11 +53,11 @@ const verifyFireBaseToken = async (req, res, next) => {
 */
 async function run() {
   try {
-    await client.connect();
-    await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
+    //await client.connect();
+    //await client.db("admin").command({ ping: 1 });
+    // console.log(
+    //   "Pinged your deployment. You successfully connected to MongoDB!"
+    // );
     const db = client.db("secureJobBoard");
     const jobCollection = db.collection("alljobs");
     const catCollection = db.collection("allcategories");
